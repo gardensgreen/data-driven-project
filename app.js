@@ -9,6 +9,13 @@ app.use(morgan("dev"));
 app.set("view engine", "pug");
 
 app.use(routes);
+
+app.use((req, res, next) => {
+    const err = new Error("The requested page couldn't be found.");
+    err.status = 404;
+    next(err);
+});
+
 app.use((err, req, res, next) => {
     if (process.env.NODE_ENV === "production") {
         //TO DO Log error to database
