@@ -2,10 +2,12 @@
 extends layout.pug
 
 block content
-  if error
+  if errors
     div(class='alert alert-danger' role='alert')
       p The following error(s) occurred:
-      pre= JSON.stringify(error, null, 2)
+      ul
+        each error in errors
+          li= error
   form(action='/book/add' method='post')
     input(type='hidden' name='_csrf' value=csrfToken)
     div(class='form-group')
