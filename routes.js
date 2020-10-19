@@ -3,7 +3,6 @@ const csrf = require("csurf");
 const { check, validationResult } = require("express-validator");
 
 const db = require("./db/models");
-const e = require("express");
 const router = express.Router();
 
 const csrfProtection = csrf({ cookie: true });
@@ -104,29 +103,29 @@ router.post(
     })
 );
 
-router.get('/book/edit/:id(\\d+)', csrfProtection,
+router.get(
+    "/book/edit/:id(\\d+)",
+    csrfProtection,
     asyncHandler(async (req, res) => {
         const bookId = parseInt(req.params.id, 10);
         const book = await db.Book.findByPk(bookId);
-        res.render('book-edit', {
-            title: 'Edit Book',
+        res.render("book-edit", {
+            title: "Edit Book",
             book,
             csrfToken: req.csrfToken(),
         });
-    }));
+    })
+);
 
-router.post('/book/edit/:id(\\d+)', csrfProtection, bookValidators,
+router.post(
+    "/book/edit/:id(\\d+)",
+    csrfProtection,
+    bookValidators,
     asyncHandler(async (req, res) => {
         const bookId = parseInt(req.params.id, 10);
         const bookToUpdate = await db.Book.findByPk(bookId);
 
-        const {
-            title,
-            author,
-            releaseDate,
-            pageCount,
-            publisher,
-        } = req.body;
+        const { title, author, releaseDate, pageCount, publisher } = req.body;
 
         const book = {
             title,
@@ -140,16 +139,42 @@ router.post('/book/edit/:id(\\d+)', csrfProtection, bookValidators,
 
         if (validatorErrors.isEmpty()) {
             await bookToUpdate.update(book);
-            res.redirect('/');
+            res.redirect("/");
         } else {
             const errors = validatorErrors.array().map((error) => error.msg);
-            res.render('book-edit', {
-                title: 'Edit Book',
+            res.render("book-edit", {
+                title: "Edit Book",
                 book: { ...book, id: bookId },
                 errors,
                 csrfToken: req.csrfToken(),
             });
         }
-    }));
+    })
+);
+
+router.get(
+    "/book/delete/:id(\\d+)",
+    csrfProtection,
+    asyncHandler(async (req, res) => {
+        const bookId = parseInt(req.params.id, 10);
+        const book = await db.Book.findByPk(bookId);
+        res.render("book-delete", {
+            title: "Delete Book",
+            book,
+            csrfToken: req.csrfToken(),
+        });
+    })
+);
+
+router.post(
+    "/book/delete/:id(\\d+)",
+    csrfProtection,
+    asyncHandler(async (req, res) => {
+        const bookId = parseInt(req.params.id, 10);
+        const book = await db.Book.findByPk(bookId);
+        await book.destroy();
+        res.redirect("/");
+    })
+);
 
 module.exports = router;
