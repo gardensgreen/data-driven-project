@@ -9,5 +9,29 @@ app.use(morgan("dev"));
 app.set("view engine", "pug");
 
 app.use(routes);
+app.use((err, req, res, next) => {
+    if(process.env.NODE_ENV === 'production'){
+        //TO DO Log error to database
+        
+    } else {
+        console.error(err);
+    }
+    next(err);
+});
+
+app.use((err, req, res, next) => {
+    if(err.status === 404){
+        res.status(404);
+        res.render('page-not-found', { title: 'Page Not Found!' });
+    } else {
+        next(err);
+    }
+});
+
+app.use((err, req, res, next) => {
+    res.status(err.status || 500);
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.render('error', { title: 'Server Error!', message: isProduction ? null:err.message, stack: isProduction ? null:err.stack});
+});
 
 module.exports = app;
