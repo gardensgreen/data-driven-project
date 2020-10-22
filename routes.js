@@ -22,15 +22,29 @@ router.get("/book/add", csrfProtection, (req, res) => {
     res.render("book-add", {
         title: "Add Book",
         book,
-        csrfToken: req.csrfToken,
+        csrfToken: req.csrfToken(),
     });
 });
 
 router.post(
-    "book/add",
+    "/book/add",
     csrfProtection,
     asyncHandler(async (req, res) => {
-        const book = db.Book.build(...req.body);
+        const {
+            title,
+            author,
+            releaseDate,
+            pageCount,
+            publisher
+        } = req.body;
+
+        const book = db.Book.build({
+            title,
+            author,
+            releaseDate,
+            pageCount,
+            publisher
+        });
 
         try {
             await book.save();
